@@ -1,0 +1,61 @@
+import requests
+import json
+
+URL = "https://proptax.bmcwbgov.in/PropertyTaxOnline/PropertyTax/Online.aspx/SelectAssesseeAdvSearchList"
+
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    'Content-Type': 'application/json; charset=utf-8',
+    'Referer': 'https://proptax.bmcwbgov.in/PropertyTaxOnline/PropertyTax/Online.aspx',
+    'Origin': 'https://proptax.bmcwbgov.in'
+}
+
+def test_search():
+    search_filter = {
+        "AssesseeNo": "017801",
+        "HoldingAddress": "",
+        "PostalAddress": "",
+        "CommunicationAddress": "",
+        "OwnerName": "",
+        "ContactNumber": "",
+        "HoldingNo": "",
+        "PlotNumber": "",
+        "PropertyZoneID": 1,
+        "WardID": 0,
+        "Block": "",
+        "Zone": {
+            "AssessmentYearDescription": "2026-2027",
+            "AssessmentYearID": 20,
+            "Code": "BID",
+            "Description": "Bidhannagar",
+            "ID": 1,
+            "InActive": False,
+            "InActiveDisplay": "No",
+            "LoginHistoryID": 0,
+            "UpdatedDate": ""
+        }
+    }
+
+    payload = {"SearchFilter": json.dumps(search_filter)}
+
+    try:
+        response = requests.post(URL, json=payload, headers=headers, timeout=15)
+        print("Status Code:", response.status_code)
+        
+        if response.status_code == 200:
+            data = response.json()
+            print("Response d:", data.get("d"))
+            
+            if data.get("d") and data["d"] != "[]":
+                results = json.loads(data["d"])
+                print("\n✅ SUCCESS! Found data:")
+                print(json.dumps(results[0], indent=2, ensure_ascii=False))
+            else:
+                print("❌ No data found in response")
+        else:
+            print("❌ Failed with status:", response.status_code)
+            
+    except Exception as e:
+        print("❌ Error:", str(e))
+
+test_search()
